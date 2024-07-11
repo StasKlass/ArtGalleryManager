@@ -1,23 +1,36 @@
 package org.example;
 
-public class Artwork {
-    private String title;
-    private String artistName;
-    private int year;
-    private String style;
-    private double estimatedValue;
+import java.time.LocalDate;
 
-    public Artwork(String title, String artistName, int year, String style, double estimatedValue) {
+public class Artwork {
+    private final String title;
+    private final Artist artist;
+    private final int year;
+    private final String style;
+    private final double estimatedValue;
+
+    public Artwork(String title, Artist artist, int year, String style, double estimatedValue) {
         this.title = title;
-        this.artistName = artistName;
+        this.artist = artist;
         this.year = year;
         this.style = style;
         this.estimatedValue = estimatedValue;
     }
 
+    public static void main(String[] args) {
+        Artist artist = new Artist("Клод Моне", LocalDate.of(1840, 11, 14), "Франция");
+        Artwork artwork = new Artwork("Впечатление, восходящее солнце", artist, 1872, "Импрессионизм", 5000000.00);
+
+        System.out.println(artwork);
+    }
+
     @Override
     public String toString() {
         return String.format("Название: %s, Художник: %s, Год: %d, Стиль: %s, Оценочная стоимость: %.2f",
-                title, artistName, year, style, estimatedValue);
+                title, artist.getName(), year, style, estimatedValue);
+    }
+
+    public String getTitle() {
+        return this.title;
     }
 }

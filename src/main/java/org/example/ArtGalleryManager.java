@@ -1,40 +1,36 @@
 package org.example;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class ArtGalleryManager {
-    private List<Artwork> artworks;
-    private List<Artist> artists;
-    private List<Exhibition> exhibitions;
+    private final List<Artwork> artworks = new ArrayList<>();
+    private final List<Artist> artists = new ArrayList<>();
+    private final List<Exhibition> exhibitions = new ArrayList<>();
+    private final Scanner scanner;
 
     public ArtGalleryManager() {
-        this.artworks = new ArrayList<>();
-        this.artists = new ArrayList<>();
-        this.exhibitions = new ArrayList<>();
+        scanner = new Scanner(System.in);
     }
 
     public void run() {
-        Scanner scanner = new Scanner(System.in);
-
         System.out.println("Добро пожаловать в менеджер галереи искусства!");
-
         while (true) {
-            printMainMenu();
-
+            printMenu();
             int choice = scanner.nextInt();
             scanner.nextLine();
 
             switch (choice) {
                 case 1:
-                    addArtwork(scanner);
+                    addArtwork();
                     break;
                 case 2:
-                    addArtist(scanner);
+                    addArtist();
                     break;
                 case 3:
-                    organizeExhibition(scanner);
+                    organizeExhibition();
                     break;
                 case 4:
                     viewAllArtworks();
@@ -43,7 +39,7 @@ public class ArtGalleryManager {
                     viewAllArtists();
                     break;
                 case 6:
-                    System.out.println("Выход из программы.");
+                    System.out.println("До свидания!");
                     return;
                 default:
                     System.out.println("Неверный выбор. Попробуйте снова.");
@@ -51,7 +47,7 @@ public class ArtGalleryManager {
         }
     }
 
-    private void printMainMenu() {
+    private void printMenu() {
         System.out.println("Выберите действие:");
         System.out.println("1. Добавить произведение искусства");
         System.out.println("2. Добавить художника");
@@ -62,14 +58,14 @@ public class ArtGalleryManager {
         System.out.print("Введите ваш выбор: ");
     }
 
-    private void addArtwork(Scanner scanner) {
+    private void addArtwork() {
         System.out.println("Вы выбрали добавление нового произведения искусства.");
-
         System.out.print("Введите название произведения: ");
         String title = scanner.nextLine();
 
         System.out.print("Введите имя художника: ");
         String artistName = scanner.nextLine();
+        Artist artist = findOrCreateArtist(artistName);
 
         System.out.print("Введите год создания: ");
         int year = scanner.nextInt();
@@ -82,41 +78,52 @@ public class ArtGalleryManager {
         double estimatedValue = scanner.nextDouble();
         scanner.nextLine();
 
-        Artwork artwork = new Artwork(title, artistName, year, style, estimatedValue);
+        Artwork artwork = new Artwork(title, artist, year, style, estimatedValue);
         artworks.add(artwork);
 
-        System.out.println("Произведение искусства успешно добавлено!");
+        System.out.printf("Произведение искусства \"%s\" успешно добавлено!\n", title);
     }
 
-    private void addArtist(Scanner scanner) {
-        System.out.println("Вы выбрали добавление нового художника.");
+    private Artist findOrCreateArtist(String name) {
+        for (Artist artist : artists) {
+            if (artist.getName().equalsIgnoreCase(name)) {
+                return artist;
+            }
+        }
+        System.out.print("Введите дату рождения (формат ГГГГ-ММ-ДД): ");
+        String birthDateStr = scanner.nextLine();
+        LocalDate birthDate = LocalDate.parse(birthDateStr);
 
+        System.out.print("Введите страну происхождения: ");
+        String country = scanner.nextLine();
+
+        Artist newArtist = new Artist(name, birthDate, country);
+        artists.add(newArtist);
+        System.out.printf("Художник %s успешно добавлен!\n", name);
+        return newArtist;
+    }
+
+    private void addArtist() {
+        System.out.println("Вы выбрали добавление нового художника.");
         System.out.print("Введите имя художника: ");
         String name = scanner.nextLine();
 
-        System.out.print("Введите дату рождения: ");
-        String birthDate = scanner.nextLine();
-
-        System.out.print("Введите страну происхождения: ");
-        String countryOfOrigin = scanner.nextLine();
-
-        Artist artist = new Artist(name, birthDate, countryOfOrigin);
+        Artist artist = findOrCreateArtist(name);
         artists.add(artist);
-
-        System.out.println("Художник успешно добавлен!");
     }
 
-    private void organizeExhibition(Scanner scanner) {
+    private void organizeExhibition() {
         System.out.println("Вы выбрали организацию выставки.");
-
         System.out.print("Введите название выставки: ");
         String name = scanner.nextLine();
 
-        System.out.print("Введите дату начала выставки: ");
-        String startDate = scanner.nextLine();
+        System.out.print("Введите дату начала выставки (формат ГГГГ-ММ-ДД): ");
+        String startDateStr = scanner.nextLine();
+        LocalDate startDate = LocalDate.parse(startDateStr);
 
-        System.out.print("Введите дату окончания выставки: ");
-        String endDate = scanner.nextLine();
+        System.out.print("Введите дату окончания выставки (формат ГГГГ-ММ-ДД): ");
+        String endDateStr = scanner.nextLine();
+        LocalDate endDate = LocalDate.parse(endDateStr);
 
         Exhibition exhibition = new Exhibition(name, startDate, endDate);
 
@@ -125,25 +132,44 @@ public class ArtGalleryManager {
         String[] artworkNames = artworkNamesLine.split(", ");
 
         for (String artworkName : artworkNames) {
-            exhibition.addArtwork(artworkName);
+            Artwork artwork = findArtworkByName(artworkName);
+            if (artwork != null) {
+                exhibition.addArtwork(artwork);
+            }
         }
 
         exhibitions.add(exhibition);
+        System.out.printf("Выставка \"%s\" успешно организована и будет проходить с %s по %s.\n",
+                name, startDate, endDate);
+        System.out.println("Включает произведения:");
+        for (Artwork artwork : exhibition.getArtworks()) {
+            System.out.println("- " + artwork.getTitle());
+        }
+    }
 
-        System.out.println("Выставка успешно организована!");
+    private Artwork findArtworkByName(String name) {
+        for (Artwork artwork : artworks) {
+            if (artwork.getTitle().equalsIgnoreCase(name)) {
+                return artwork;
+            }
+        }
+        System.out.printf("Произведение искусства с названием \"%s\" не найдено.\n", name);
+        return null;
     }
 
     private void viewAllArtworks() {
+        System.out.println("Вы выбрали просмотр всех произведений искусства.");
         System.out.println("Список всех произведений:");
-        for (Artwork artwork : artworks) {
-            System.out.println(artwork);
+        for (int i = 0; i < artworks.size(); i++) {
+            System.out.printf("%d. %s\n", i + 1, artworks.get(i).toString());
         }
     }
 
     private void viewAllArtists() {
+        System.out.println("Вы выбрали просмотр всех художников.");
         System.out.println("Список всех художников:");
-        for (Artist artist : artists) {
-            System.out.println(artist);
+        for (int i = 0; i < artists.size(); i++) {
+            System.out.printf("%d. %s\n", i + 1, artists.get(i).toString());
         }
     }
 

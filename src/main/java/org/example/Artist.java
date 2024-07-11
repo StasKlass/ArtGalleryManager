@@ -1,18 +1,24 @@
 package org.example;
 
-public class Artist {
-    private String name;
-    private String birthDate;
-    private String countryOfOrigin;
+import java.time.LocalDate;
 
-    public Artist(String name, String birthDate, String countryOfOrigin) {
+public class Artist {
+    private final String name;
+    private final LocalDate birthDate;
+    private final String countryOfOrigin;
+
+    public Artist(String name, LocalDate birthDate, String countryOfOrigin) {
         this.name = name;
         this.birthDate = birthDate;
         this.countryOfOrigin = countryOfOrigin;
     }
 
+    public String getName() {
+        return name;
+    }
+
     @Override
     public String toString() {
-        return String.format("%s - %s, %s", name, birthDate, countryOfOrigin);
+        return String.format("%s - %s, %s", name, birthDate.toString(), countryOfOrigin);
     }
 }
